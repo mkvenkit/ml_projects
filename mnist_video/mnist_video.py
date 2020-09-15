@@ -105,8 +105,8 @@ def start_cv(model):
         res = predict(model, iconImg)
 
         if frameCount == 20:
-            frame[0:480, 0:80] = 0
-            
+            background[0:480, 0:80] = 0
+
         cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
         cv2.imshow('background', background)
         # cv2.imshow('resized', resizedFrame)
