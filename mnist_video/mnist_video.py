@@ -2,7 +2,14 @@
 
     mnist_video.py
 
-    
+    A simple program that demonstrates recognizing handwritten digits from a webcam using 
+    the mnist dataset. Uses OpenCV and TensorFlow.
+
+    Authors:
+
+        Mahesh Venkitachalam
+        Aryan Mahesh 
+        electronut.in
 
 """
 
@@ -69,7 +76,7 @@ def predict(model, img):
 # opencv part 
 # 
 
-threshold = 0
+threshold = 100
 def on_threshold(x):
     global threshold
     threshold = x
@@ -80,7 +87,7 @@ def start_cv(model):
     frame = cv2.namedWindow('background')
     cv2.createTrackbar('threshold', 'background', 150, 255, on_threshold)
     background = np.zeros((480, 640), np.uint8)
-    frameCount 0
+    frameCount = 0
 
     while True:
         ret, frame = cap.read()
@@ -104,8 +111,9 @@ def start_cv(model):
         
         res = predict(model, iconImg)
 
-        if frameCount == 20:
+        if frameCount == 5:
             background[0:480, 0:80] = 0
+            frameCount = 0
 
         cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
         cv2.imshow('background', background)
