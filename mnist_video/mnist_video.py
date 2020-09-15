@@ -58,10 +58,12 @@ def train_model(x_train, y_train, x_test, y_test):
     print(history.epoch, history.history['accuracy'][-1])
     return model
 
-def predict(model):
-    res = model.predict(x_test[11:12])
-    print(res)
-
+def predict(model, img):
+    imgs = np.array([img])
+    res = model.predict(imgs)
+    index = np.argmax(res)
+    #print(index)
+    return str(index)
 
 # 
 # opencv part 
@@ -78,21 +80,25 @@ def start_cv(model):
 
     while True:
         ret, frame = cap.read()
-        frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
+        #print(frame.shape)
+        #frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
+        #print(frame.shape)
+
 
         frame[0:480, 0:80] = 0
         frame[0:480, 560:640] = 0
         grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         threshold = cv2.getTrackbarPos('threshold', 'background')
-        _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY)
-        cv2.putText(background, 'X', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+        _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY_INV)
+        
         resizedFrame = thr[240-75:240+75, 320-75:320+75]
         background[240-75:240+75, 320-75:320+75] = resizedFrame
 
         iconImg = cv2.resize(resizedFrame, (28, 28))
         
-        
+        res = predict(model, iconImg)
+        cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
         cv2.imshow('background', background)
         # cv2.imshow('resized', resizedFrame)
         if cv2.waitKey(1) & 0xff == ord('q'):
@@ -102,13 +108,13 @@ def start_cv(model):
     cv2.destroyAllWindows()
 
 def main():
-
     # load and train data 
     print("getting mnist data...")
     (x_train, y_train, x_test, y_test) = get_mnist_data()
     print("training model...")
     model = train_model(x_train, y_train, x_test, y_test)
     print("starting cv...")
+
     # show opencv window
     start_cv(model)
 
