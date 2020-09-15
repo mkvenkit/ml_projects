@@ -69,13 +69,16 @@ def predict(model, img):
 # opencv part 
 # 
 
+threshold = 0
 def on_threshold(x):
-    pass
+    global threshold
+    threshold = x
 
 def start_cv(model):
+    global threshold
     cap = cv2.VideoCapture(0)
     frame = cv2.namedWindow('background')
-    cv2.createTrackbar('threshold', 'background', 0, 255, on_threshold)
+    cv2.createTrackbar('threshold', 'background', 150, 255, on_threshold)
     background = np.zeros((480, 640), np.uint8)
 
     while True:
@@ -89,7 +92,7 @@ def start_cv(model):
         frame[0:480, 560:640] = 0
         grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        threshold = cv2.getTrackbarPos('threshold', 'background')
+        #threshold = cv2.getTrackbarPos('threshold', 'background')
         _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY_INV)
         
         resizedFrame = thr[240-75:240+75, 320-75:320+75]
