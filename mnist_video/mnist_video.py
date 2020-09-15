@@ -125,11 +125,20 @@ def start_cv(model):
     cv2.destroyAllWindows()
 
 def main():
-    # load and train data 
-    print("getting mnist data...")
-    (x_train, y_train, x_test, y_test) = get_mnist_data()
-    print("training model...")
-    model = train_model(x_train, y_train, x_test, y_test)
+
+    model = None
+    try:
+        model = tf.keras.models.load_model('model.sav')
+        print('loaded saved model.')
+        print(model.summary())
+    except:
+        # load and train data 
+        print("getting mnist data...")
+        (x_train, y_train, x_test, y_test) = get_mnist_data()
+        print("training model...")
+        model = train_model(x_train, y_train, x_test, y_test)
+        model.save('model.sav')
+    
     print("starting cv...")
 
     # show opencv window
