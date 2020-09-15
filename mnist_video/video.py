@@ -13,11 +13,12 @@ cap = cv2.VideoCapture(2)
 frame = cv2.namedWindow('background')
 cv2.createTrackbar('threshold', 'background', 0, 255, on_threshold)
 background = np.zeros((480, 640), np.uint8)
-
+frameCount = 0
 
 while True:
     ret, frame = cap.read()
     frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
+    frameCount += 1
 
     frame[0:480, 0:80] = 0
     frame[0:480, 560:640] = 0
@@ -30,6 +31,8 @@ while True:
     background[240-75:240+75, 320-75:320+75] = resizedFrame
 
     iconImg = cv2.resize(resizedFrame, (28, 28))
+    if frameCount == 20:
+        frame[0:480, 0:80] = 0
     
     
     cv2.imshow('background', background)
@@ -39,4 +42,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-

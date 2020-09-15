@@ -80,9 +80,11 @@ def start_cv(model):
     frame = cv2.namedWindow('background')
     cv2.createTrackbar('threshold', 'background', 150, 255, on_threshold)
     background = np.zeros((480, 640), np.uint8)
+    frameCount 0
 
     while True:
         ret, frame = cap.read()
+        frameCount += 1
         #print(frame.shape)
         #frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
         #print(frame.shape)
@@ -101,6 +103,10 @@ def start_cv(model):
         iconImg = cv2.resize(resizedFrame, (28, 28))
         
         res = predict(model, iconImg)
+
+        if frameCount == 20:
+            frame[0:480, 0:80] = 0
+            
         cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
         cv2.imshow('background', background)
         # cv2.imshow('resized', resizedFrame)
