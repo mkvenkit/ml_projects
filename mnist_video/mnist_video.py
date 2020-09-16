@@ -3,7 +3,9 @@
     mnist_video.py
 
     A simple program that demonstrates recognizing handwritten digits from a webcam using 
-    the mnist dataset. Uses OpenCV and TensorFlow.
+    the mnist dataset. 
+    
+    Uses OpenCV 4.4.0 and TensorFlow 2.2.0.
 
     Authors:
 
@@ -22,6 +24,7 @@ from PIL import Image
 import cv2
 from matplotlib import pyplot as plt
 
+# get mnist daat and cache it 
 def get_mnist_data():
     # get mnist data 
     path = 'mnist.npz'
@@ -32,6 +35,7 @@ def get_mnist_data():
     (x_train, y_train),(x_test, y_test) = mnist.load_data(path=path)
     return (x_train, y_train, x_test, y_test)
 
+# train model with mnist data 
 def train_model(x_train, y_train, x_test, y_test):
     # set up TF model and train 
     # callback 
@@ -65,6 +69,7 @@ def train_model(x_train, y_train, x_test, y_test):
     print(history.epoch, history.history['accuracy'][-1])
     return model
 
+# predict digit using image passed in 
 def predict(model, img):
     imgs = np.array([img])
     res = model.predict(imgs)
@@ -76,62 +81,71 @@ def predict(model, img):
 # opencv part 
 # 
 
-<<<<<<< HEAD
-threshold = 0
-click = False
+# left mouse click handler 
+startInference = False
 def ifClicked(event, x, y, flags, params):
-    global click
-    if event = cv2.EVENT_LBUTTONDOWN:
-        click = not Clicked
+    global startInference
+    if event == cv2.EVENT_LBUTTONDOWN:
+        startInference = not startInference
 
-=======
+# threshold slider handler 
 threshold = 100
->>>>>>> 3313fd1c67bea1322096cee26e8d30ae611db479
 def on_threshold(x):
     global threshold
     threshold = x
 
+# the opencv display loop 
 def start_cv(model):
     global threshold
     cap = cv2.VideoCapture(0)
     frame = cv2.namedWindow('background')
+    cv2.setMouseCallback('background', ifClicked)
     cv2.createTrackbar('threshold', 'background', 150, 255, on_threshold)
     background = np.zeros((480, 640), np.uint8)
     frameCount = 0
 
     while True:
         ret, frame = cap.read()
-        frameCount += 1
-        #print(frame.shape)
-        #frame = cv2.resize(frame, None, fx=0.5, fy=0.5)
-        #print(frame.shape)
 
+        if (startInference):
+            
+            # frame counter for showing text 
+            frameCount += 1
 
-        frame[0:480, 0:80] = 0
-        frame[0:480, 560:640] = 0
-        grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            # black outer frame
+            frame[0:480, 0:80] = 0
+            frame[0:480, 560:640] = 0
+            grayFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        #threshold = cv2.getTrackbarPos('threshold', 'background')
-        _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY_INV)
-        
-        resizedFrame = thr[240-75:240+75, 320-75:320+75]
-        resizedBgrFrame = frame[240-75:240+75, 320-75:320+75]
-        if click == False:
-            background[240-75:240+75, 320-75:320+75] = resizedBgrFrame
-        else:
+            # apply threshold
+            _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY_INV)
+           
+
+            # get central image 
+            resizedFrame = thr[240-75:240+75, 320-75:320+75]
             background[240-75:240+75, 320-75:320+75] = resizedFrame
 
-        iconImg = cv2.resize(resizedFrame, (28, 28))
-        
-        res = predict(model, iconImg)
+            # resize for inference 
+            iconImg = cv2.resize(resizedFrame, (28, 28))
+            
+            # pass to model predictor 
+            res = predict(model, iconImg)
 
-        if frameCount == 5:
-            background[0:480, 0:80] = 0
-            frameCount = 0
+            # clear background 
+            if frameCount == 5:
+                background[0:480, 0:80] = 0
+                frameCount = 0
 
-        cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
-        cv2.rectangle(background, (320-80, 240-80), (320+80, 240+80), (255, 255, 255), thickness=3)
-        cv2.imshow('background', background)
+            # show text 
+            cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+            cv2.rectangle(background, (320-80, 240-80), (320+80, 240+80), (255, 255, 255), thickness=3)
+            
+            # display frame 
+            cv2.imshow('background', background)
+        else:
+            # display normal video 
+            cv2.imshow('background', frame)
+
         # cv2.imshow('resized', resizedFrame)
         if cv2.waitKey(1) & 0xff == ord('q'):
             break
@@ -139,8 +153,9 @@ def start_cv(model):
     cap.release()
     cv2.destroyAllWindows()
 
+# main function 
 def main():
-
+    # if a model is already saved just load it - else build it 
     model = None
     try:
         model = tf.keras.models.load_model('model.sav')
@@ -152,6 +167,7 @@ def main():
         (x_train, y_train, x_test, y_test) = get_mnist_data()
         print("training model...")
         model = train_model(x_train, y_train, x_test, y_test)
+        print("saving model...")
         model.save('model.sav')
     
     print("starting cv...")
