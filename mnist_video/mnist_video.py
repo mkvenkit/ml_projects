@@ -2,7 +2,14 @@
 
     mnist_video.py
 
-    
+    A simple program that demonstrates recognizing handwritten digits from a webcam using 
+    the mnist dataset. Uses OpenCV and TensorFlow.
+
+    Authors:
+
+        Mahesh Venkitachalam
+        Aryan Mahesh 
+        electronut.in
 
 """
 
@@ -69,6 +76,7 @@ def predict(model, img):
 # opencv part 
 # 
 
+<<<<<<< HEAD
 threshold = 0
 click = False
 def ifClicked(event, x, y, flags, params):
@@ -76,6 +84,9 @@ def ifClicked(event, x, y, flags, params):
     if event = cv2.EVENT_LBUTTONDOWN:
         click = not Clicked
 
+=======
+threshold = 100
+>>>>>>> 3313fd1c67bea1322096cee26e8d30ae611db479
 def on_threshold(x):
     global threshold
     threshold = x
@@ -86,7 +97,7 @@ def start_cv(model):
     frame = cv2.namedWindow('background')
     cv2.createTrackbar('threshold', 'background', 150, 255, on_threshold)
     background = np.zeros((480, 640), np.uint8)
-    frameCount 0
+    frameCount = 0
 
     while True:
         ret, frame = cap.read()
@@ -114,8 +125,9 @@ def start_cv(model):
         
         res = predict(model, iconImg)
 
-        if frameCount == 20:
+        if frameCount == 5:
             background[0:480, 0:80] = 0
+            frameCount = 0
 
         cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
         cv2.rectangle(background, (320-80, 240-80), (320+80, 240+80), (255, 255, 255), thickness=3)
@@ -128,11 +140,20 @@ def start_cv(model):
     cv2.destroyAllWindows()
 
 def main():
-    # load and train data 
-    print("getting mnist data...")
-    (x_train, y_train, x_test, y_test) = get_mnist_data()
-    print("training model...")
-    model = train_model(x_train, y_train, x_test, y_test)
+
+    model = None
+    try:
+        model = tf.keras.models.load_model('model.sav')
+        print('loaded saved model.')
+        print(model.summary())
+    except:
+        # load and train data 
+        print("getting mnist data...")
+        (x_train, y_train, x_test, y_test) = get_mnist_data()
+        print("training model...")
+        model = train_model(x_train, y_train, x_test, y_test)
+        model.save('model.sav')
+    
     print("starting cv...")
 
     # show opencv window
