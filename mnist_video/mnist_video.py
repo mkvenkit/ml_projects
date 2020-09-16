@@ -70,6 +70,12 @@ def predict(model, img):
 # 
 
 threshold = 0
+click = False
+def ifClicked(event, x, y, flags, params):
+    global click
+    if event = cv2.EVENT_LBUTTONDOWN:
+        click = not Clicked
+
 def on_threshold(x):
     global threshold
     threshold = x
@@ -98,7 +104,11 @@ def start_cv(model):
         _, thr = cv2.threshold(grayFrame, threshold, 255, cv2.THRESH_BINARY_INV)
         
         resizedFrame = thr[240-75:240+75, 320-75:320+75]
-        background[240-75:240+75, 320-75:320+75] = resizedFrame
+        resizedBgrFrame = frame[240-75:240+75, 320-75:320+75]
+        if click == False:
+            background[240-75:240+75, 320-75:320+75] = resizedBgrFrame
+        else:
+            background[240-75:240+75, 320-75:320+75] = resizedFrame
 
         iconImg = cv2.resize(resizedFrame, (28, 28))
         
@@ -108,6 +118,7 @@ def start_cv(model):
             background[0:480, 0:80] = 0
 
         cv2.putText(background, res, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 3)
+        cv2.rectangle(background, (320-80, 240-80), (320+80, 240+80), (255, 255, 255), thickness=3)
         cv2.imshow('background', background)
         # cv2.imshow('resized', resizedFrame)
         if cv2.waitKey(1) & 0xff == ord('q'):
